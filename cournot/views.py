@@ -5,9 +5,8 @@ from .models import Constants
 
 
 class Introduction(Page):
-    is_visited = False
     def is_displayed(self):
-        return not self.is_visited
+        return self.round_number == 1
 
 
 class Decide(Page):
@@ -24,7 +23,7 @@ class ResultsWaitPage(WaitPage):
 
 class Results(Page):
     def vars_for_template(self):
-        return {'total_plus_base': self.player.payoff + Constants.base_points}
+        return {'total_plus_base': self.player.payoff}
 
 
 page_sequence = [

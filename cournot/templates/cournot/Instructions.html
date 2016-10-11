@@ -13,25 +13,25 @@
 
     <p>
         The two of you decide simultaneously and independently how many units to manufacture.
-        Your choices can be any number from 0 to {{ Constants.max_units_per_player }}.
+        Your choices can be any number from 0 to {{ Constants.R }}.
         All produced units will be sold, but the more is produced, the lower the unit selling price will be.
     </p>
 
 
-    <p>
-        The unit selling price is:
-    </p>
+{#    <p>#}
+{#        The unit selling price is:#}
+{#    </p>#}
 
-    <ul>
-        <strong>Unit selling price = {{ Constants.total_capacity }} – Units produced by your firm – Units produced by the other firm</strong>
-    </ul>
+{#    <ul>#}
+{#        <strong>Unit selling price = {{ Constants.total_capacity }} – Units produced by your firm – Units produced by the other firm</strong>#}
+{#    </ul>#}
 
     <p>
         Your profit, measured in points, is therefore:
     </p>
 
     <ul>
-        <strong>Your fitness function = {{ group.get_pR }} - {{ player.get_fitness_function }}.</strong>
+        <strong>Your fitness function = {{ Constants.pR }} - {{ player.get_fitness_function_to_string }}.</strong>
     </ul>
 
     <p>

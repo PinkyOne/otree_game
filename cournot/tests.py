@@ -16,7 +16,7 @@ class PlayerBot(Bot):
             assert self.player.payoff == c(0)
 
         if self.case == 'max':
-            yield (views.Decide, {'units': Constants.max_units_per_player})
+            yield (views.Decide, {'units': Constants.R})
             # if everyone produces max, price is driven to 0
             assert self.player.payoff == c(0)
 

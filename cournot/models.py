@@ -1,3 +1,4 @@
+import math
 from otree.api import (
     models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
     Currency as c, currency_range
@@ -14,15 +15,18 @@ this implementation, there are 2 firms competing for 1 period.
 
 class Constants(BaseConstants):
     name_in_url = 'cournot'
-    players_per_group = 2
-    num_rounds = 5
+    players_per_group = 3
+    num_rounds = 4
 
     instructions_template = 'cournot/Instructions.html'
 
     base_points = 50
     # Total production capacity of all players
     total_capacity = 60
-    max_units_per_player = int(total_capacity / players_per_group)
+
+    R = 1000
+    p = 2000
+    pR = p * R
 
 
 class Subsession(BaseSubsession):
@@ -30,10 +34,6 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
-    R = 1000
-    p = 2000
-    pR = p * R
-
     price = models.CurrencyField(
         doc="""Unit price: P = T - \sum U_i, where T is total capacity and U_i is the number of units produced by player i"""
     )
@@ -42,41 +42,66 @@ class Group(BaseGroup):
         doc="""Total units produced by all players"""
     )
 
-    def get_pR(self):
-        return self.pR
-
     def set_payoffs(self):
-        self.total_units = sum([p.units for p in self.get_players()])
-        self.price = Constants.total_capacity - self.total_units
-        for p in self.get_players():
-            p.payoff = self.price * p.units
+        Bank.make_decision(self.get_players())
 
 
 class Player(BasePlayer):
     FITNESS_FUNCTIONS = [
         dict(function=lambda x: x * x, func_to_string="x^2"),
         dict(function=lambda x: x * x * 2, func_to_string="2 * x^2"),
-        dict(function=lambda x: x * x * x * x / 50, func_to_string="x^4 / 50"),
-        dict(function=lambda x: x * x * x * x / 100, func_to_string="x^4 / 100")
+        dict(function=lambda x: x * x * 4, func_to_string="4 * x^2")
     ]
 
     fitness_function = None
 
     units = models.PositiveIntegerField(
-        min=0, max=Constants.max_units_per_player,
+        min=0, max=Constants.p,
         doc="""Quantity of units to produce"""
     )
 
+    def get_fitness_function_to_string(self):
+        return self.get_fitness_function().get('func_to_string')
+
     def get_fitness_function(self):
         if self.fitness_function is None:
-            rand_int = randint(0, len(Player.FITNESS_FUNCTIONS) - 1)
-            self.fitness_function = Player.FITNESS_FUNCTIONS[rand_int]
-            Player.FITNESS_FUNCTIONS.remove(self.fitness_function)
+            self.fitness_function = Player.FITNESS_FUNCTIONS[self.id_in_group - 1]
 
-        return self.fitness_function.get('func_to_string')
+        return self.fitness_function
 
     def other_player(self):
         return self.get_others_in_group()[0]
 
-    def get_fitness_function_value(self, x):
-        return Group.pR - self.fitness_function.get('func_to_string')(x)
+    def get_fitness_function_value(self):
+        return c(Constants.pR - self.get_fitness_function().get('function')(self.payoff))
+
+
+class Bank():
+    @staticmethod
+    def make_decision(players):
+        pool = Bank.divide_resources(players)
+        Bank.divide_remained_resources(pool, players)
+
+    @staticmethod
+    def divide_resources(players):
+        sorted_players_list = sorted(players, key=lambda player: player.units)
+        players_count = len(sorted_players_list)
+        pool = Constants.R
+        avg = int(round(pool / players_count))
+        for player in sorted_players_list:
+            if player.units <= avg:
+                player.payoff = player.units
+            else:
+                player.payoff = avg
+            pool -= player.payoff
+            players_count -= 1
+            if players_count > 0:
+                avg = int(round(pool / players_count))
+        return pool
+
+    @staticmethod
+    def divide_remained_resources(pool, players):
+        if pool > 0:
+            avg = int(round(pool / len(players)))
+            for player in players:
+                player.payoff += avg
