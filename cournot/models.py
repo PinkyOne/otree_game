@@ -96,33 +96,3 @@ class Bank():
         for player in players:
             x = player.get_target_payoff() / player.units
             player.payoff = (x * group.get_R()) / sum
-
-    @staticmethod
-    def make_decision_old(group):
-        players = group.get_players()
-        pool = Bank.divide_resources(players)
-        Bank.divide_remained_resources(pool, players)
-
-    @staticmethod
-    def divide_resources(players):
-        sorted_players_list = sorted(players, key=lambda player: player.units)
-        players_count = len(sorted_players_list)
-        pool = Constants.R
-        avg = int(round(pool / players_count))
-        for player in sorted_players_list:
-            if player.units <= avg:
-                player.payoff = player.units
-            else:
-                player.payoff = avg
-            pool -= player.payoff
-            players_count -= 1
-            if players_count > 0:
-                avg = int(round(pool / players_count))
-        return pool
-
-    @staticmethod
-    def divide_remained_resources(pool, players):
-        if pool > 0:
-            avg = int(round(pool / len(players)))
-            for player in players:
-                player.payoff += avg
