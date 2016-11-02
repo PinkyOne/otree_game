@@ -6,7 +6,6 @@ from boto.mturk import qualification
 
 import otree.settings
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # the environment variable OTREE_PRODUCTION controls whether Django runs in
@@ -20,7 +19,6 @@ ADMIN_USERNAME = 'admin'
 
 # for security, best to set admin password in an environment variable
 ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
-
 
 # don't share this with anybody.
 SECRET_KEY = '$!nu4yz&&r5fh-_)o^+g0-z18yd!ib2ma5!%k63h)t85=iv5f4'
@@ -48,20 +46,17 @@ DATABASES = {
 
 AUTH_LEVEL = environ.get('OTREE_AUTH_LEVEL')
 
-
 # setting for integration with AWS Mturk
 AWS_ACCESS_KEY_ID = environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = environ.get('AWS_SECRET_ACCESS_KEY')
-
 
 # e.g. EUR, CAD, GBP, CHF, CNY, JPY
 REAL_WORLD_CURRENCY_CODE = 'USD'
 USE_POINTS = True
 
-
 # e.g. en, de, fr, it, ja, zh-hans
 # see: https://docs.djangoproject.com/en/1.9/topics/i18n/#term-language-code
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'ru'
 
 # if an app is included in SESSION_CONFIGS, you don't need to list it here
 INSTALLED_APPS = ['otree']
@@ -99,7 +94,6 @@ ROOMS = [
     },
 ]
 
-
 # from here on are qualifications requirements for workers
 # see description for requirements on Amazon Mechanical Turk website:
 # http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QualificationRequirementDataStructureArticle.html
@@ -113,8 +107,8 @@ mturk_hit_settings = {
     'frame_height': 500,
     'preview_template': 'global/MTurkPreview.html',
     'minutes_allotted_per_assignment': 60,
-    'expiration_hours': 7*24, # 7 days
-    #'grant_qualification_id': 'YOUR_QUALIFICATION_ID_HERE',# to prevent retakes
+    'expiration_hours': 7 * 24,  # 7 days
+    # 'grant_qualification_id': 'YOUR_QUALIFICATION_ID_HERE',# to prevent retakes
     'qualification_requirements': [
         # qualification.LocaleRequirement("EqualTo", "US"),
         # qualification.PercentAssignmentsApprovedRequirement("GreaterThanOrEqualTo", 50),
@@ -122,7 +116,6 @@ mturk_hit_settings = {
         # qualification.Requirement('YOUR_QUALIFICATION_ID_HERE', 'DoesNotExist')
     ]
 }
-
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
@@ -139,11 +132,13 @@ SESSION_CONFIG_DEFAULTS = {
 SESSION_CONFIGS = [
     {
         'name': 'cournot',
-        'display_name': "Cournot Competition",
+        'display_name': "Игра по тройкам",
         'num_demo_participants': 3,
         'app_sequence': [
             'cournot', 'payment_info'
         ],
+        'R': 1000,
+        'a': '1, 2, 3'
     }
 ]
 

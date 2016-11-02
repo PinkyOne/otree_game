@@ -24,61 +24,82 @@ class Constants(BaseConstants):
     # Total production capacity of all players
     total_capacity = 60
 
-    R = 1000
-    p = 2000
-    pR = p * R
+    b = 2000
 
 
 class Subsession(BaseSubsession):
-    pass
+    def get_R(self):
+        return self.session.config['R']
 
 
 class Group(BaseGroup):
     price = models.CurrencyField(
         doc="""Unit price: P = T - \sum U_i, where T is total capacity and U_i is the number of units produced by player i"""
     )
-
     total_units = models.PositiveIntegerField(
         doc="""Total units produced by all players"""
     )
+    a = None
+
+    def get_a(self):
+        if (self.a is None):
+            a_strings = self.session.config['a'].replace(" ","").split(',')
+            a = []
+            for a_i in a_strings:
+                a.append(int(a_i))
+
+            self.a = a
+        return self.a
+
+    def get_R(self):
+        return self.session.config['R']
 
     def set_payoffs(self):
-        Bank.make_decision(self.get_players())
+        Bank.make_decision(self)
 
 
 class Player(BasePlayer):
-    FITNESS_FUNCTIONS = [
-        dict(function=lambda x: x * x, func_to_string="x^2"),
-        dict(function=lambda x: x * x * 2, func_to_string="2 * x^2"),
-        dict(function=lambda x: x * x * 4, func_to_string="4 * x^2")
-    ]
-
+    units = models.PositiveIntegerField(
+        min=0, max=None,
+        doc="""Размер заявки"""
+    )
     fitness_function = None
 
-    units = models.PositiveIntegerField(
-        min=0, max=Constants.p,
-        doc="""Quantity of units to produce"""
-    )
-
-    def get_fitness_function_to_string(self):
-        return self.get_fitness_function().get('func_to_string')
+    def get_target_payoff(self):
+        return Constants.b / (2 * self.get_a_i())
 
     def get_fitness_function(self):
         if self.fitness_function is None:
-            self.fitness_function = Player.FITNESS_FUNCTIONS[self.id_in_group - 1]
-
+            a = self.get_a_i()
+            self.fitness_function = lambda x: Constants.b * x - a * x * x
+        print(self.fitness_function)
         return self.fitness_function
+
+    def get_a_i(self):
+        a = self.group.get_a()
+        return a[self.id_in_group - 1]
 
     def other_player(self):
         return self.get_others_in_group()[0]
 
     def get_fitness_function_value(self):
-        return c(Constants.pR - self.get_fitness_function().get('function')(self.payoff))
+        return c(self.get_fitness_function()(self.payoff))
 
 
 class Bank():
     @staticmethod
-    def make_decision(players):
+    def make_decision(group):
+        players = group.get_players()
+        sum = 0
+        for player in players:
+            sum += player.get_target_payoff() / player.units
+        for player in players:
+            x = player.get_target_payoff() / player.units
+            player.payoff = (x * group.get_R()) / sum
+
+    @staticmethod
+    def make_decision_old(group):
+        players = group.get_players()
         pool = Bank.divide_resources(players)
         Bank.divide_remained_resources(pool, players)
 
