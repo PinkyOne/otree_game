@@ -12,5 +12,10 @@
     {% next_button %}
 
     {% include Constants.instructions_template %}
+    {% if group.round_number != 1 %}
+
+        {% include Constants.korgin_calculator_template %}
+        {% include Constants.chart_template %}
+    {% endif %}
 
 {% endblock %}

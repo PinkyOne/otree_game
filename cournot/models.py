@@ -19,6 +19,8 @@ class Constants(BaseConstants):
     num_rounds = 4
 
     instructions_template = 'cournot/Instructions.html'
+    korgin_calculator_template = 'cournot/Korgin_calculator.html'
+    chart_template = 'cournot/Previous_round_chart.html'
 
     base_points = 50
     # Total production capacity of all players
@@ -41,9 +43,27 @@ class Group(BaseGroup):
     )
     a = None
 
+    def get_requests(self):
+        requests = []
+        for player in self.get_players():
+            requests.append(int(player.in_round(player.round_number-1).units))
+        return requests
+
+    def get_payoffs(self):
+        payoffs = []
+        for player in self.get_players():
+            payoffs.append(player.in_round(player.round_number-1).payoff)
+        return payoffs
+
+    def get_target_payoffs(self):
+        payoffs = []
+        for player in self.get_players():
+            payoffs.append(player.in_round(player.round_number-1).get_target_payoff())
+        return payoffs
+
     def get_a(self):
-        if (self.a is None):
-            a_strings = self.session.config['a'].replace(" ","").split(',')
+        if self.a is None:
+            a_strings = self.session.config['a'].replace(" ", "").split(',')
             a = []
             for a_i in a_strings:
                 a.append(int(a_i))
@@ -60,13 +80,17 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     units = models.PositiveIntegerField(
-        min=0, max=None,
+        min=1, max=None,
         doc="""Размер заявки"""
     )
     fitness_function = None
+    previous_units = None
+
+    def get_korgin_value(self):
+        return Promter.calculate_korgin_value(self.group, self)
 
     def get_target_payoff(self):
-        return Constants.b / (2 * self.get_a_i())
+        return int(Constants.b / (2 * self.get_a_i()))
 
     def get_fitness_function(self):
         if self.fitness_function is None:
@@ -84,6 +108,17 @@ class Player(BasePlayer):
 
     def get_fitness_function_value(self):
         return c(self.get_fitness_function()(self.payoff))
+
+
+class Promter():
+    @staticmethod
+    def calculate_korgin_value(group, player):
+        players = group.get_players()
+        sum = 0
+        for _player in players:
+            sum += _player.get_target_payoff() / _player.in_round(_player.round_number - 1).units
+        C = sum - player.get_target_payoff() / player.in_round(player.round_number - 1).units
+        return round((group.get_R() - player.get_target_payoff()) / C)
 
 
 class Bank():

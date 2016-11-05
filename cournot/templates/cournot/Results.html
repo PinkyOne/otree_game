@@ -2,12 +2,12 @@
 {% load staticfiles otree_tags %}
 
 {% block title %}
-    Results
+    Результаты
 {% endblock %}
 
 {% block content %}
 
-    <p>The results are shown in the following table.</p>
+    <p>Результаты представлены в таблице.</p>
 
     <table class="table table-test" style="width:400px; margin-bottom:10px">
 
@@ -21,25 +21,10 @@
             <td>{{ player.payoff }} </td>
         </tr>
 
-{#        <tr>#}
-{#            <td>Total production:</td>#}
-{#            <td>{{ group.total_units }} units</td>#}
-{#        </tr>#}
-
-{#        <tr>#}
-{#            <td style="border-top-width:4px">Unit selling price:</td>#}
-{#            <td style="border-top-width:4px">{{ Constants.total_capacity }} – {{ group.total_units }} = {{ group.price }}</td>#}
-{#        </tr>#}
-
         <tr>
             <td>Ваша прибыль:</td>
             <td>{{ player.get_fitness_function_value }}</td>
         </tr>
-
-{#        <tr>#}
-{#            <td style="border-top-width:4px">In total, you receive:</td>#}
-{#            <td style="border-top-width:4px">{{ total_plus_base }}</td>#}
-{#        </tr>#}
 
     </table>
 
