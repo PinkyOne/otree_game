@@ -14,19 +14,17 @@ this implementation, there are 2 firms competing for 1 period.
 
 
 class Constants(BaseConstants):
-    name_in_url = 'cournot'
+    name_in_url = 'cournot_with_korgin_calc'
     players_per_group = 3
     num_rounds = 4
 
-    instructions_template = 'cournot/Instructions.html'
-    korgin_calculator_template = 'cournot/Korgin_calculator.html'
-    chart_template = 'cournot/Previous_round_chart.html'
+    instructions_template = 'cournot_with_korgin_calc/Instructions.html'
+    korgin_calculator_template = 'cournot_with_korgin_calc/Korgin_calculator.html'
+    chart_template = 'cournot_with_korgin_calc/Previous_round_chart.html'
 
     base_points = 50
     # Total production capacity of all players
     total_capacity = 60
-
-    b = 2000
 
 
 class Subsession(BaseSubsession):
@@ -74,6 +72,9 @@ class Group(BaseGroup):
     def get_R(self):
         return self.session.config['R']
 
+    def get_b(self):
+        return self.session.config['b']
+
     def set_payoffs(self):
         Bank.make_decision(self)
 
@@ -90,12 +91,12 @@ class Player(BasePlayer):
         return Promter.calculate_korgin_value(self.group, self)
 
     def get_target_payoff(self):
-        return int(Constants.b / (2 * self.get_a_i()))
+        return int(self.group.get_b() / (2 * self.get_a_i()))
 
     def get_fitness_function(self):
         if self.fitness_function is None:
             a = self.get_a_i()
-            self.fitness_function = lambda x: Constants.b * x - a * x * x
+            self.fitness_function = lambda x: self.group.get_b() * x - a * x * x
         print(self.fitness_function)
         return self.fitness_function
 
