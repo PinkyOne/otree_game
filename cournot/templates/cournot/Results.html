@@ -1,0 +1,35 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Результаты
+{% endblock %}
+
+{% block content %}
+
+    <p>Результаты представлены в таблице.</p>
+
+    <table class="table table-test" style="width:400px; margin-bottom:10px">
+
+        <tr>
+            <td>Ваша фирмам запрашивала:</td>
+            <td>{{ player.units }} очков</td>
+        </tr>
+
+        <tr>
+            <td>Банк выделил вашей фирмме:</td>
+            <td>{{ player.payoff }} </td>
+        </tr>
+
+        <tr>
+            <td>Ваша прибыль:</td>
+            <td>{{ player.get_fitness_function_value }}</td>
+        </tr>
+
+    </table>
+
+    {% next_button %}
+
+    {% include Constants.instructions_template %}
+
+{% endblock %}

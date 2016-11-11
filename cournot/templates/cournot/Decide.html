@@ -1,0 +1,19 @@
+{% extends "global/Base.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Production
+{% endblock %}
+
+{% block content %}
+
+    {% formfield player.units with label="Сколько вы запросите у банка?" %}
+
+    {% next_button %}
+
+    {% include Constants.instructions_template %}
+    {% if group.round_number != 1 %}
+        {% include Constants.chart_template %}
+    {% endif %}
+
+{% endblock %}
