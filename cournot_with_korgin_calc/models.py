@@ -16,11 +16,13 @@ this implementation, there are 2 firms competing for 1 period.
 class Constants(BaseConstants):
     name_in_url = 'cournot_with_korgin_calc'
     players_per_group = 3
-    num_rounds = 4
+    num_rounds = 2
+    rounds = range(1, num_rounds + 1)
 
     instructions_template = 'cournot_with_korgin_calc/Instructions.html'
     korgin_calculator_template = 'cournot_with_korgin_calc/Korgin_calculator.html'
     chart_template = 'cournot_with_korgin_calc/Previous_round_chart.html'
+    table_with_results_template = 'cournot_with_korgin_calc/Table_with_results.html'
 
     base_points = 50
     # Total production capacity of all players
@@ -30,6 +32,9 @@ class Constants(BaseConstants):
 class Subsession(BaseSubsession):
     def get_R(self):
         return self.session.config['R']
+
+    def get_with_korgin(self):
+        return 'true' in self.session.config['with_korgin']
 
 
 class Group(BaseGroup):
@@ -44,19 +49,19 @@ class Group(BaseGroup):
     def get_requests(self):
         requests = []
         for player in self.get_players():
-            requests.append(int(player.in_round(player.round_number-1).units))
+            requests.append(int(player.in_round(player.round_number - 1).units))
         return requests
 
     def get_payoffs(self):
         payoffs = []
         for player in self.get_players():
-            payoffs.append(player.in_round(player.round_number-1).payoff)
+            payoffs.append(player.in_round(player.round_number - 1).payoff)
         return payoffs
 
     def get_target_payoffs(self):
         payoffs = []
         for player in self.get_players():
-            payoffs.append(player.in_round(player.round_number-1).get_target_payoff())
+            payoffs.append(player.in_round(player.round_number - 1).get_target_payoff())
         return payoffs
 
     def get_a(self):
@@ -86,6 +91,9 @@ class Player(BasePlayer):
     )
     fitness_function = None
     previous_units = None
+
+    def get_units(self):
+        return c(self.units)
 
     def get_korgin_value(self):
         return Promter.calculate_korgin_value(self.group, self)

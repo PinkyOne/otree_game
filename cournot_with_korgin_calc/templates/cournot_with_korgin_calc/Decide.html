@@ -1,21 +1,27 @@
 {% extends "global/Base.html" %}
 {% load staticfiles otree_tags %}
 
+
 {% block title %}
+    <link rel="stylesheet" href="assets/css/decide.css">
     Production
 {% endblock %}
 
 {% block content %}
+    <div id="left">
+        {% formfield player.units with label="Сколько вы запросите у банка?" %}
 
-    {% formfield player.units with label="Сколько вы запросите у банка?" %}
+        {% next_button %}
 
-    {% next_button %}
-
-    {% include Constants.instructions_template %}
-    {% if group.round_number != 1 %}
-
-        {% include Constants.korgin_calculator_template %}
-        {% include Constants.chart_template %}
-    {% endif %}
-
+        {% include Constants.instructions_template %}
+        {% if group.round_number != 1 %}
+            {% if subsession.get_with_korgin %}
+                {% include Constants.korgin_calculator_template %}
+            {% endif %}
+            {% include Constants.chart_template %}
+        {% endif %}
+    </div>
+    <div id="right">
+        {% include Constants.table_with_results_template %}
+    </div>
 {% endblock %}

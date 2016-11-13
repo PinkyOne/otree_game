@@ -14,12 +14,23 @@ class Introduction(Page):
 class Decide(Page):
     form_model = models.Player
     form_fields = ['units']
+
     def vars_for_template(self):
         # Filling the data for HighCharts graph
         if self.round_number != 1:
             requests = self.group.get_requests()
             payoffs = self.group.get_payoffs()
-            target_payoffs = self.group.get_target_payoffs()
+            id_in_group = self.player.id_in_group
+            length = len(self.group.get_players())
+            i = 0
+            target_payoffs = []
+            while i < length:
+                if i+1 != id_in_group:
+                    target_payoffs.append(None)
+                else:
+                    target_payoffs.append(self.player.get_target_payoff())
+                i += 1
+
             series = [
                 {
                     'name': 'Запрошено',
@@ -36,7 +47,6 @@ class Decide(Page):
             ]
 
             highcharts_series = safe_json(series)
-
 
             return {
                 'highcharts_series': highcharts_series

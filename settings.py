@@ -139,18 +139,20 @@ SESSION_CONFIGS = [
         ],
         'b': 2000,
         'R': 1000,
-        'a': '1, 2, 3'
+        'a': '1, 2, 3',
+        'with_korgin': 'true'
     },
-{
+    {
         'name': 'cournot',
         'display_name': "Игра по тройкам",
         'num_demo_participants': 3,
         'app_sequence': [
-            'cournot', 'payment_info'
+            'cournot_with_korgin_calc', 'payment_info'
         ],
         'b': 2000,
         'R': 1000,
-        'a': '1, 2, 3'
+        'a': '1, 2, 3',
+        'with_korgin': 'false'
     }
 ]
 
