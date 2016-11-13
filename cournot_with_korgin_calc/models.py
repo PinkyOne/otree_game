@@ -101,6 +101,9 @@ class Player(BasePlayer):
     def get_target_payoff(self):
         return int(self.group.get_b() / (2 * self.get_a_i()))
 
+    def get_target_fitness_function_value(self):
+        return self.get_fitness_function()(self.get_target_payoff())
+
     def get_fitness_function(self):
         if self.fitness_function is None:
             a = self.get_a_i()
