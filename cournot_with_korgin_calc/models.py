@@ -18,6 +18,7 @@ class Constants(BaseConstants):
     players_per_group = 3
     num_rounds = 2
     rounds = range(1, num_rounds + 1)
+    rules = range(1, 6)
 
     instructions_template = 'cournot_with_korgin_calc/Instructions.html'
     korgin_calculator_template = 'cournot_with_korgin_calc/Korgin_calculator.html'
@@ -96,7 +97,7 @@ class Player(BasePlayer):
         return c(self.units)
 
     def get_korgin_value(self):
-        return Promter.calculate_korgin_value(self.group, self)
+        return KorginPromter.calculate_korgin_value(self.group, self)
 
     def get_target_payoff(self):
         return int(self.group.get_b() / (2 * self.get_a_i()))
@@ -122,7 +123,11 @@ class Player(BasePlayer):
         return c(self.get_fitness_function()(self.payoff))
 
 
-class Promter():
+class FuzzyPromter():
+    pass
+
+
+class KorginPromter():
     @staticmethod
     def calculate_korgin_value(group, player):
         players = group.get_players()
