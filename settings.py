@@ -155,7 +155,8 @@ SESSION_CONFIGS = [
         'with_korgin': 'false'
     }
 ]
-
+SENTRY_DSN = 'http://48ef88a16af84b6487ff69c3eb3b2168:c352463796d649929a1d01861307c426@sentry.otree.org/101'
 # anything you put after the below line will override
 # oTree's default settings. Use with caution.
 otree.settings.augment_settings(globals())
+
