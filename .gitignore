@@ -90,3 +90,4 @@ ENV/
 .idea
 
 *.sqlite3
+/venv_otree/
