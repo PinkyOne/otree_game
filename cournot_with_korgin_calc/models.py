@@ -16,7 +16,7 @@ this implementation, there are 2 firms competing for 1 period.
 class Constants(BaseConstants):
     name_in_url = 'cournot_with_korgin_calc'
     players_per_group = 3
-    num_rounds = 2
+    num_rounds = 10
     rounds = range(1, num_rounds + 1)
     rules = range(1, 6)
 
