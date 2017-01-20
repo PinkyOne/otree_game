@@ -15,6 +15,9 @@
 
         {% include Constants.instructions_template %}
         {% if group.round_number != 1 %}
+            {% if subsession.get_with_fuzzy_promter %}
+                {% include Constants.fuzzy_promter %}
+            {% endif %}
             {% if subsession.get_with_korgin %}
                 {% include Constants.korgin_calculator_template %}
             {% endif %}

@@ -131,6 +131,19 @@ SESSION_CONFIG_DEFAULTS = {
 
 SESSION_CONFIGS = [
     {
+        'name': 'cournot_with_fuzzy_promter',
+        'display_name': "Игра по тройкам с подсказчиком",
+        'num_demo_participants': 3,
+        'app_sequence': [
+            'cournot_with_korgin_calc', 'payment_info'
+        ],
+        'b': 2000,
+        'R': 1000,
+        'a': '1, 2, 3',
+        'with_korgin': 'false',
+        'with_fuzzy_promter': 'true'
+    },
+    {
         'name': 'cournot_with_korgin_calc',
         'display_name': "Игра по тройкам с калькулятором",
         'num_demo_participants': 3,
@@ -140,7 +153,8 @@ SESSION_CONFIGS = [
         'b': 2000,
         'R': 1000,
         'a': '1, 2, 3',
-        'with_korgin': 'true'
+        'with_korgin': 'true',
+        'with_fuzzy_promter': 'false'
     },
     {
         'name': 'cournot',
@@ -152,7 +166,8 @@ SESSION_CONFIGS = [
         'b': 2000,
         'R': 1000,
         'a': '1, 2, 3',
-        'with_korgin': 'false'
+        'with_korgin': 'false',
+        'with_fuzzy_promter': 'false'
     }
 ]
 SENTRY_DSN = 'http://48ef88a16af84b6487ff69c3eb3b2168:c352463796d649929a1d01861307c426@sentry.otree.org/101'

@@ -2,39 +2,21 @@
 
 <div>
     <h3>Подсказчик</h3>
-    <table>
-        <caption>Подсказчик</caption>
-        <thead>
-        <tr>
-            <th>Правило №</th>
-            {% for rule in Constants.rule %}
-                <th colspan="1">{{ rule }}</th>
-            {% endfor %}
-        </tr>
-        <tr>
-            <td></td>
-            {% for round_number in Constants.rounds %}
-                <td>Заявка</td>
-                <td>Выдано</td>
-            {% endfor %}
-        </tr>
-        </thead>
-        <tbody>
-        {% for player in group.get_players %}
-            <tr>
-                <td>Игрок {{ player.id_in_group }}</td>
-                {% for playr in player.in_previous_rounds %}
-                    <td>{{ playr.get_units }}</td>
-                    <td>{{ playr.payoff }}</td>
-                {% endfor %}
-                {% for round_number in Constants.rounds %}
-                    {% if group.round_number > round_number %}
-                        <td></td>
-                        <td></td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+{#    <table>#}
+{#        <caption>Подсказчик</caption>#}
+{#        <thead>#}
+{#        <tr>#}
+{#            <th>Правило №</th>#}
+{#            {% for rule in Constants.rule %}#}
+{#                <th colspan="1">{{ rule }}</th>#}
+{#            {% endfor %}#}
+{#        </tr>#}
+{#        <tbody>#}
+{#        {% for rule in player.rules %}#}
+{##}
+{#        {% endfor %}#}
+{##}
+{#        </tbody>#}
+{#    </table>#}
+    <p>Подсказчик советует: {{ player.get_fuzzy_tip }}</p>
 </div>

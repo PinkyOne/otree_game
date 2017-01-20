@@ -24,6 +24,7 @@ class Constants(BaseConstants):
     korgin_calculator_template = 'cournot_with_korgin_calc/Korgin_calculator.html'
     chart_template = 'cournot_with_korgin_calc/Previous_round_chart.html'
     table_with_results_template = 'cournot_with_korgin_calc/Table_with_results.html'
+    fuzzy_promter = 'cournot_with_korgin_calc/Fuzzy_promter.html'
 
     base_points = 50
     # Total production capacity of all players
@@ -36,6 +37,9 @@ class Subsession(BaseSubsession):
 
     def get_with_korgin(self):
         return 'true' in self.session.config['with_korgin']
+
+    def get_with_fuzzy_promter(self):
+        return 'true' in self.session.config['with_fuzzy_promter']
 
 
 class Group(BaseGroup):
@@ -122,9 +126,90 @@ class Player(BasePlayer):
     def get_fitness_function_value(self):
         return c(self.get_fitness_function()(self.payoff))
 
+    def get_fuzzy_tip(self):
+        return FuzzyPromter.get_tip(self)
+
 
 class FuzzyPromter():
-    pass
+    @staticmethod
+    def get_n(group):
+        n = 0.0
+        for player in group.get_players():
+            if FuzzyPromter.get_alpha(player) >= 1.0:
+                n += 1.0
+        return n / len(group.get_players())
+
+    @staticmethod
+    def get_alpha(player):
+        payoff = player.in_round(player.round_number - 1).payoff
+        target_payoff = player.get_target_payoff()
+        return payoff / target_payoff
+
+    @staticmethod
+    def get_mu_alphas(player):
+        alpha = FuzzyPromter.get_alpha(player)
+        mu_alphas = {}
+
+        mu_alphas['low'] = 1.0 - alpha if alpha <= 1.0 else 0.0
+
+        if alpha <= 0.5:
+            mu_alphas['near1'] = 0.0
+        elif alpha <= 1.0:
+            mu_alphas['near1'] = 2 * alpha - 1.0
+        elif alpha <= 1.5:
+            mu_alphas['near1'] = 3.0 - 2 * alpha
+        else:
+            mu_alphas['near1'] = 0
+        mu_alphas['near1'] = 0.0 if alpha <= 1.0 else 0.0
+
+        target_payoff = player.get_target_payoff()
+        r = player.group.get_R()
+        x_div_r = target_payoff / r
+
+        mu_alphas['high'] = 1.0 - alpha if alpha <= 1.0 else x_div_r * alpha - x_div_r
+        return mu_alphas
+
+    @staticmethod
+    def defuzz_alpha(player):
+        mu_alphas = FuzzyPromter.get_mu_alphas(player)
+        inverse = [(value, key) for key, value in mu_alphas.items()]
+        pair = Pair()
+        pair.set_key_value(max(inverse)[1], mu_alphas[max(inverse)[1]])
+        return pair
+
+    @staticmethod
+    def defuzz_n(player):
+        mu_n = FuzzyPromter.get_mu_n(player)
+        inverse = [(value, key) for key, value in mu_n.items()]
+        pair = Pair()
+        pair.set_key_value(max(inverse)[1], mu_n[max(inverse)[1]])
+        return pair
+
+    @staticmethod
+    def get_mu_n(player):
+        mu_n = {}
+        mu_n['low'] = 1 - FuzzyPromter.get_n(player.group)
+        mu_n['high'] = FuzzyPromter.get_n(player.group)
+        return mu_n
+
+    @staticmethod
+    def get_tip(player):
+        n_pair = FuzzyPromter.defuzz_n(player)
+        alpha_pair = FuzzyPromter.defuzz_alpha(player)
+        print(n_pair.key)
+        print(alpha_pair.key)
+        if alpha_pair.key == 'low' and n_pair.key == 'low':
+            return 'Понизить заявку сильно'
+        elif alpha_pair.key == 'low' and n_pair.key == 'high':
+            return 'Ничего не делать'
+        elif alpha_pair.key == 'near1' and n_pair.key == 'low':
+            return 'Понизить заявку'
+        elif alpha_pair.key == 'near1' and n_pair.key == 'high':
+            return 'Повысить заявку'
+        elif alpha_pair.key == 'high' and n_pair.key == 'low':
+            return 'Ничего не делать'
+        elif alpha_pair.key == 'high' and n_pair.key == 'high':
+            return 'Повысить заявку сильно'
 
 
 class KorginPromter():
@@ -148,3 +233,12 @@ class Bank():
         for player in players:
             x = player.get_target_payoff() / player.units
             player.payoff = (x * group.get_R()) / sum
+
+
+class Pair():
+    key = None
+    value = None
+
+    def set_key_value(self, key, value):
+        self.key = key
+        self.value = value
