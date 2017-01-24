@@ -141,7 +141,7 @@ class FuzzyPromter():
 
     @staticmethod
     def get_alpha(player):
-        payoff = player.in_round(player.round_number - 1).payoff
+        payoff = int(player.in_round(player.round_number - 1).payoff)
         target_payoff = player.get_target_payoff()
         return payoff / target_payoff
 
@@ -194,22 +194,66 @@ class FuzzyPromter():
 
     @staticmethod
     def get_tip(player):
-        n_pair = FuzzyPromter.defuzz_n(player)
-        alpha_pair = FuzzyPromter.defuzz_alpha(player)
-        print(n_pair.key)
-        print(alpha_pair.key)
-        if alpha_pair.key == 'low' and n_pair.key == 'low':
-            return 'Понизить заявку сильно'
-        elif alpha_pair.key == 'low' and n_pair.key == 'high':
-            return 'Ничего не делать'
-        elif alpha_pair.key == 'near1' and n_pair.key == 'low':
-            return 'Понизить заявку'
-        elif alpha_pair.key == 'near1' and n_pair.key == 'high':
-            return 'Повысить заявку'
-        elif alpha_pair.key == 'high' and n_pair.key == 'low':
-            return 'Ничего не делать'
-        elif alpha_pair.key == 'high' and n_pair.key == 'high':
-            return 'Повысить заявку сильно'
+        mu_n = FuzzyPromter.get_mu_n(player)
+        mu_alpha = FuzzyPromter.get_mu_alphas(player)
+        rules = []
+        max_id = 0
+        max = min(mu_alpha['low'], mu_n['low'])
+        rules.append({
+            'rule': 'Понизить заявку сильно',
+            'value': round(min(mu_alpha['low'], mu_n['low']),2),
+            'is_max': 0
+        })
+        value = min(mu_alpha['low'], mu_n['high'])
+        if max < value:
+            max = value
+            max_id = 1
+        rules.append({
+            'rule': 'Ничего не делать',
+            'value': round(min(mu_alpha['low'], mu_n['high']),2),
+            'is_max': 0
+        })
+        value = min(mu_alpha['near1'], mu_n['low'])
+        if max < value:
+            max = value
+            max_id = 2
+        rules.append({
+            'rule': 'Понизить заявку',
+            'value': round(min(mu_alpha['near1'], mu_n['low']),2),
+            'is_max': 0
+        })
+        value = min(mu_alpha['near1'], mu_n['high'])
+        if max < value:
+            max = value
+            max_id = 3
+        rules.append({
+            'rule': 'Повысить заявку',
+            'value': round(min(mu_alpha['near1'], mu_n['high']),2),
+            'is_max': 0
+        })
+        value = min(mu_alpha['high'], mu_n['low'])
+        if max < value:
+            max = value
+            max_id = 4
+        rules.append({
+            'rule': 'Ничего не делать',
+            'value': round(min(mu_alpha['high'], mu_n['low']),2),
+            'is_max': 0
+        })
+        value = min(mu_alpha['high'], mu_n['high'])
+        if max < value:
+            max = value
+            max_id = 5
+        rules.append({
+            'rule': 'Повысить заявку сильно',
+            'value': round(min(mu_alpha['high'], mu_n['high']),2),
+            'is_max': 0
+        })
+        rules[max_id]['is_max'] = 1
+        print(max)
+        print(rules)
+        return rules
+
 
 
 class KorginPromter():

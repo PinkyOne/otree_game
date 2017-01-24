@@ -1,22 +1,42 @@
 {% load otree_tags staticfiles %}
 
 <div>
+<style>
+    td#max{
+        background: #00FF00;
+    }
+</style>
     <h3>Подсказчик</h3>
-{#    <table>#}
-{#        <caption>Подсказчик</caption>#}
-{#        <thead>#}
-{#        <tr>#}
-{#            <th>Правило №</th>#}
-{#            {% for rule in Constants.rule %}#}
-{#                <th colspan="1">{{ rule }}</th>#}
-{#            {% endfor %}#}
-{#        </tr>#}
-{#        <tbody>#}
-{#        {% for rule in player.rules %}#}
-{##}
-{#        {% endfor %}#}
-{##}
-{#        </tbody>#}
-{#    </table>#}
-    <p>Подсказчик советует: {{ player.get_fuzzy_tip }}</p>
+    <table>
+        <caption>Подсказчик</caption>
+        <thead>
+        <tr>
+            <th>Правило №</th>
+            <th colspan="2">1</th>
+            <th colspan="2">2</th>
+            <th colspan="2">3</th>
+            <th colspan="2">4</th>
+            <th colspan="2">5</th>
+            <th colspan="2">6</th>
+        </tr>
+        <tbody>
+        <tr>
+        <td></td>
+            {% for rule in player.get_fuzzy_tip %}
+                <td{% if rule.is_max == 1 %}
+                    id="max"
+                    {% endif %}
+                >
+                    {{ rule.rule }}
+                </td>
+                <td{% if rule.is_max == 1 %}
+                    id="max"
+                    {% endif %}>
+                    {{ rule.value }}
+                </td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+{#    <p>Подсказчик советует: {{ player.get_fuzzy_tip }}</p>#}
 </div>
