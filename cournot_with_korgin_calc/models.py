@@ -74,7 +74,7 @@ class Group(BaseGroup):
             a_strings = self.session.config['a'].replace(" ", "").split(',')
             a = []
             for a_i in a_strings:
-                a.append(int(a_i))
+                a.append(float(a_i))
 
             self.a = a
         return self.a
