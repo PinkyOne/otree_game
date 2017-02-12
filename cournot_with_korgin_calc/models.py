@@ -127,7 +127,7 @@ class Player(BasePlayer):
         return c(self.get_fitness_function()(self.payoff))
 
     def get_fuzzy_tip(self):
-        return FuzzyPromter.get_tip(self)
+        return FuzzyPromter.get_tip_values(self)
 
 
 class FuzzyPromter():
@@ -201,7 +201,7 @@ class FuzzyPromter():
         max = min(mu_alpha['low'], mu_n['low'])
         rules.append({
             'rule': 'Понизить заявку сильно',
-            'value': round(min(mu_alpha['low'], mu_n['low']),2),
+            'value': round(min(mu_alpha['low'], mu_n['low']), 2),
             'is_max': 0
         })
         value = min(mu_alpha['low'], mu_n['high'])
@@ -210,7 +210,7 @@ class FuzzyPromter():
             max_id = 1
         rules.append({
             'rule': 'Ничего не делать',
-            'value': round(min(mu_alpha['low'], mu_n['high']),2),
+            'value': round(min(mu_alpha['low'], mu_n['high']), 2),
             'is_max': 0
         })
         value = min(mu_alpha['near1'], mu_n['low'])
@@ -219,7 +219,7 @@ class FuzzyPromter():
             max_id = 2
         rules.append({
             'rule': 'Понизить заявку',
-            'value': round(min(mu_alpha['near1'], mu_n['low']),2),
+            'value': round(min(mu_alpha['near1'], mu_n['low']), 2),
             'is_max': 0
         })
         value = min(mu_alpha['near1'], mu_n['high'])
@@ -228,7 +228,7 @@ class FuzzyPromter():
             max_id = 3
         rules.append({
             'rule': 'Повысить заявку',
-            'value': round(min(mu_alpha['near1'], mu_n['high']),2),
+            'value': round(min(mu_alpha['near1'], mu_n['high']), 2),
             'is_max': 0
         })
         value = min(mu_alpha['high'], mu_n['low'])
@@ -237,21 +237,30 @@ class FuzzyPromter():
             max_id = 4
         rules.append({
             'rule': 'Ничего не делать',
-            'value': round(min(mu_alpha['high'], mu_n['low']),2),
+            'value': round(min(mu_alpha['high'], mu_n['low']), 2),
             'is_max': 0
         })
         value = min(mu_alpha['high'], mu_n['high'])
         if max < value:
-            max = value
             max_id = 5
         rules.append({
             'rule': 'Повысить заявку сильно',
-            'value': round(min(mu_alpha['high'], mu_n['high']),2),
+            'value': round(min(mu_alpha['high'], mu_n['high']), 2),
             'is_max': 0
         })
         rules[max_id]['is_max'] = 1
-        print(max)
-        print(rules)
+        return rules
+
+    @staticmethod
+    def get_tip_values(player):
+        rules = FuzzyPromter.get_tip(player)
+        for rule in rules:
+            if ("Повысить" in rule['rule']):
+                rule['value'] = int(player.in_round(player.round_number - 1).units) * (1.0 + rule['value'])
+            elif("Понизить" in rule['rule']):
+                rule['value'] = int(player.in_round(player.round_number - 1).units) * (1.0 - rule['value'])
+            else:
+                rule['value'] = int(player.in_round(player.round_number - 1).units)
         return rules
 
 
