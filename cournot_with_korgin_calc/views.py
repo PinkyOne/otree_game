@@ -7,6 +7,9 @@ from .models import Constants
 
 
 class Introduction(Page):
+    form_model = models.Player
+    form_fields = ['a']
+
     def is_displayed(self):
         return self.round_number == 1
 
