@@ -94,8 +94,9 @@ class Player(BasePlayer):
         min=1, max=None,
         doc="""Размер заявки"""
     )
-    a = models.FloatField(
-        min=0.1, doc="""Значение параметра a целевой функции"""
+    fake_a = models.FloatField(
+        min=0.00000000000000000000001, max=1000.0, blank=True,
+        doc="""Значение параметра a целевой функции"""
     )
     fitness_function = None
     previous_units = None
@@ -107,7 +108,11 @@ class Player(BasePlayer):
         return KorginPromter.calculate_korgin_value(self.group, self)
 
     def get_target_payoff(self):
-        return int(self.group.get_b() / (2 * self.get_a_i()))
+        if self.fake_a is None:
+            a = self.get_a_i()
+        else:
+            a = self.fake_a
+        return int(self.group.get_b() / (2 * a))
 
     def get_target_fitness_function_value(self):
         return self.get_fitness_function()(self.get_target_payoff())
@@ -120,7 +125,8 @@ class Player(BasePlayer):
         return self.fitness_function
 
     def get_a_i(self):
-        return self.in_round(1).a
+        a = self.group.get_a()
+        return a[self.id_in_group - 1]
 
     def other_player(self):
         return self.get_others_in_group()[0]

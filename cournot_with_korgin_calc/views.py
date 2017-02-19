@@ -8,7 +8,6 @@ from .models import Constants
 
 class Introduction(Page):
     form_model = models.Player
-    form_fields = ['a']
 
     def is_displayed(self):
         return self.round_number == 1
@@ -16,7 +15,7 @@ class Introduction(Page):
 
 class Decide(Page):
     form_model = models.Player
-    form_fields = ['units']
+    form_fields = ['units', 'fake_a']
 
     def vars_for_template(self):
         # Filling the data for HighCharts graph

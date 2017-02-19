@@ -11,6 +11,8 @@
     <div id="left">
         {% formfield player.units with label="Сколько вы запросите у банка?" %}
 
+        {% formfield player.fake_a with label="Введите значение параметра a, котое будет использовано при распределении" %}
+
         {% next_button %}
 
         {% include Constants.instructions_template %}
