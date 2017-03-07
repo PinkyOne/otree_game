@@ -35,13 +35,6 @@ class Subsession(BaseSubsession):
     def get_R(self):
         return self.session.config['R']
 
-    def get_with_korgin(self):
-        return 'true' in self.session.config['with_korgin']
-
-    def get_with_fuzzy_promter(self):
-        return 'true' in self.session.config['with_fuzzy_promter']
-
-
 class Group(BaseGroup):
     price = models.CurrencyField(
         doc="""Unit price: P = T - \sum U_i, where T is total capacity and U_i is the number of units produced by player i"""
@@ -101,6 +94,23 @@ class Player(BasePlayer):
     fitness_function = None
     previous_units = None
 
+
+    def get_with_korgin(self):
+        with_random_promter = 'true' in self.session.config['with_random_promter']
+        with_korgin = 'true' in self.session.config['with_korgin']
+        if with_random_promter:
+            with_korgin = self.id_in_group == 1
+        print(self.id_in_group)
+        return with_korgin
+
+    def get_with_fuzzy_promter(self):
+        with_random_promter = 'true' in self.session.config['with_random_promter']
+        with_fuzzy_promter = 'true' in self.session.config['with_fuzzy_promter']
+        if with_random_promter:
+            with_fuzzy_promter = self.id_in_group == 3
+        print(self.id_in_group)
+        return with_fuzzy_promter
+
     def get_units(self):
         return c(self.units)
 
@@ -114,8 +124,12 @@ class Player(BasePlayer):
             a = self.fake_a
         return int(self.group.get_b() / (2 * a))
 
+    def get_real_target_payoff(self):
+        a = self.get_a_i()
+        return int(self.group.get_b() / (2 * a))
+
     def get_target_fitness_function_value(self):
-        return self.get_fitness_function()(self.get_target_payoff())
+        return self.get_fitness_function()(self.get_real_target_payoff())
 
     def get_fitness_function(self):
         if self.fitness_function is None:
@@ -143,6 +157,8 @@ class FuzzyPromter():
     def get_n(group):
         n = 0.0
         for player in group.get_players():
+            print(player.id_in_group)
+            print(FuzzyPromter.get_alpha(player))
             if FuzzyPromter.get_alpha(player) >= 1.0:
                 n += 1.0
         return n / len(group.get_players())
@@ -150,31 +166,31 @@ class FuzzyPromter():
     @staticmethod
     def get_alpha(player):
         payoff = int(player.in_round(player.round_number - 1).payoff)
-        target_payoff = player.get_target_payoff()
+        target_payoff = player.get_real_target_payoff()
         return payoff / target_payoff
 
     @staticmethod
     def get_mu_alphas(player):
         alpha = FuzzyPromter.get_alpha(player)
+        print("alpha: "+str(alpha))
         mu_alphas = {}
 
         mu_alphas['low'] = 1.0 - alpha if alpha <= 1.0 else 0.0
 
-        if alpha <= 0.5:
+        if 0 < alpha <= 0.5:
             mu_alphas['near1'] = 0.0
-        elif alpha <= 1.0:
+        elif 0.5 < alpha <= 1.0:
             mu_alphas['near1'] = 2 * alpha - 1.0
-        elif alpha <= 1.5:
+        elif 1.0 < alpha <= 1.5:
             mu_alphas['near1'] = 3.0 - 2 * alpha
         else:
             mu_alphas['near1'] = 0
-        mu_alphas['near1'] = 0.0 if alpha <= 1.0 else 0.0
 
-        target_payoff = player.get_target_payoff()
+        target_payoff = player.get_real_target_payoff()
         r = player.group.get_R()
         x_div_r = target_payoff / r
 
-        mu_alphas['high'] = 1.0 - alpha if alpha <= 1.0 else x_div_r * alpha - x_div_r
+        mu_alphas['high'] = 0.0 if alpha <= 1.0 else x_div_r * alpha - x_div_r
         return mu_alphas
 
     @staticmethod
@@ -204,6 +220,8 @@ class FuzzyPromter():
     def get_tip(player):
         mu_n = FuzzyPromter.get_mu_n(player)
         mu_alpha = FuzzyPromter.get_mu_alphas(player)
+        print(mu_n)
+        print(mu_alpha)
         rules = []
         max_id = 0
         max = min(mu_alpha['low'], mu_n['low'])
@@ -263,12 +281,14 @@ class FuzzyPromter():
     def get_tip_values(player):
         rules = FuzzyPromter.get_tip(player)
         for rule in rules:
+            rule['rule_val'] = rule['value']
             if ("Повысить" in rule['rule']):
-                rule['value'] = int(player.in_round(player.round_number - 1).units) * (1.0 + rule['value'])
+                rule['value'] = round(int(player.in_round(player.round_number - 1).units) * (1.0 + rule['value']))
             elif("Понизить" in rule['rule']):
-                rule['value'] = int(player.in_round(player.round_number - 1).units) * (1.0 - rule['value'])
+                rule['value'] = round(int(player.in_round(player.round_number - 1).units) * (1.0 - rule['value']))
             else:
                 rule['value'] = int(player.in_round(player.round_number - 1).units)
+        print(rules)
         return rules
 
 
@@ -279,9 +299,9 @@ class KorginPromter():
         players = group.get_players()
         sum = 0
         for _player in players:
-            sum += _player.get_target_payoff() / _player.in_round(_player.round_number - 1).units
-        C = sum - player.get_target_payoff() / player.in_round(player.round_number - 1).units
-        return round((group.get_R() - player.get_target_payoff()) / C)
+            sum += _player.get_real_target_payoff() / _player.in_round(_player.round_number - 1).units
+        C = sum - player.get_real_target_payoff() / player.in_round(player.round_number - 1).units
+        return round((group.get_R() - player.get_real_target_payoff()) / C)
 
 
 class Bank():

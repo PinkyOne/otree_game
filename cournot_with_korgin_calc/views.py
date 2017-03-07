@@ -30,7 +30,7 @@ class Decide(Page):
                 if i+1 != id_in_group:
                     target_payoffs.append(None)
                 else:
-                    target_payoffs.append(self.player.get_target_payoff())
+                    target_payoffs.append(self.player.get_real_target_payoff())
                 i += 1
 
             series = [
